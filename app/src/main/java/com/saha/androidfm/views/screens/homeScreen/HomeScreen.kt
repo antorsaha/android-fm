@@ -37,6 +37,7 @@ import com.saha.androidfm.R
 import com.saha.androidfm.data.enums.Screen
 import com.saha.androidfm.ui.theme.backgroundColor
 import com.saha.androidfm.ui.theme.primaryButtonColor
+import com.saha.androidfm.viewmodels.RadioPlayerViewModel
 import com.saha.androidfm.views.screens.SettingScreen
 import com.saha.androidfm.views.screens.history.HistoryScreen
 
@@ -46,6 +47,7 @@ object HomeScreenRoute
 fun HomeScreen(navController: NavController) {
     val context: Context = LocalContext.current
     val viewModel: HomeViewModel = hiltViewModel()
+    val radioPlayerViewMode: RadioPlayerViewModel = hiltViewModel()
 
     val home =
         Screen("home", "Sticker Maker", ImageVector.vectorResource(id = R.drawable.ic_home))
@@ -140,7 +142,7 @@ fun HomeScreen(navController: NavController) {
                             AnimatedContentTransitionScope.SlideDirection.Right,
                             animationSpec = tween(animationDuration)
                         )
-                    }) { HomeScreenContent(navControllerBottomNavigation, navController) }
+                    }) { HomeScreenContent(navControllerBottomNavigation, navController, radioPlayerViewMode) }
                 composable(history.route, enterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,

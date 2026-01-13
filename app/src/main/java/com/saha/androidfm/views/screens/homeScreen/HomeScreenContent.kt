@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.saha.androidfm.ui.theme.backgroundColor
 import com.saha.androidfm.utils.helpers.Logger
+import com.saha.androidfm.viewmodels.RadioPlayerViewModel
 import com.saha.androidfm.views.components.RadioPlayer
 
 private const val TAG = "HomeScreenContent"
@@ -23,7 +24,8 @@ private const val TAG = "HomeScreenContent"
 @Composable
 fun HomeScreenContent(
     navController: NavController,
-    parentNavController: NavController
+    parentNavController: NavController,
+    radioPlayerViewModel: RadioPlayerViewModel
 ) {
     val context = LocalContext.current
     val viewModel: HomeViewModel = hiltViewModel()
@@ -40,7 +42,7 @@ fun HomeScreenContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Radio Player Section
-            RadioPlayer()
+            RadioPlayer(radioPlayerViewModel)
         }
     }
 }

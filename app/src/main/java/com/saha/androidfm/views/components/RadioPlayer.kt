@@ -24,7 +24,7 @@ import com.saha.androidfm.viewmodels.RadioPlayerViewModel
 
 @Composable
 fun RadioPlayer(
-    viewModel: RadioPlayerViewModel = hiltViewModel(),
+    viewModel: RadioPlayerViewModel,
     modifier: Modifier = Modifier
 ) {
     val isPlaying by viewModel.isPlaying.collectAsState()

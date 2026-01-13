@@ -1,8 +1,15 @@
 package com.saha.androidfm.viewmodels
 
 import android.app.Application
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.net.Uri
+import android.os.Build
+import android.os.IBinder
 import android.util.Log
+import java.lang.ref.WeakReference
 import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +22,7 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import com.saha.androidfm.services.RadioPlayerService
 import com.saha.androidfm.utils.helpers.M3UParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 private const val TAG = "RadioPlayerViewModel"
 
@@ -34,6 +43,33 @@ class RadioPlayerViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
 
     private var exoPlayer: ExoPlayer? = null
+    private var radioPlayerServiceRef: WeakReference<RadioPlayerService>? = null
+    private var serviceBound = false
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as RadioPlayerService.LocalBinder
+            val service = binder.getService()
+            radioPlayerServiceRef = WeakReference(service)
+            serviceBound = true
+            exoPlayer?.let { player ->
+                service.setPlayer(player)
+            }
+            _stationName.value?.let { stationName ->
+                service.updateStationInfo(stationName)
+            }
+            Log.d(TAG, "Service connected")
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            radioPlayerServiceRef = null
+            serviceBound = false
+            Log.d(TAG, "Service disconnected")
+        }
+    }
+    
+    private val radioPlayerService: RadioPlayerService?
+        get() = radioPlayerServiceRef?.get()
 
     private val _playerState = MutableStateFlow<PlayerState>(PlayerState.Idle)
     val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
@@ -102,9 +138,11 @@ class RadioPlayerViewModel @Inject constructor(
                             _isPlaying.value = isPlaying
                             if (isPlaying) {
                                 _playerState.value = PlayerState.Playing
+                                startNotificationService()
                             } else if (_playerState.value == PlayerState.Playing) {
                                 _playerState.value = PlayerState.Paused
                             }
+                            radioPlayerService?.updateStationInfo(_stationName.value)
                         }
 
                         override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
@@ -118,10 +156,7 @@ class RadioPlayerViewModel @Inject constructor(
                                 error.errorCode in 2000..2999 -> {
                                     "Network error: ${error.message ?: "Connection failed"}. Please check your internet connection."
                                 }
-                                // File not found errors
-                                error.errorCode == androidx.media3.common.PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND -> {
-                                    "Stream not found. The URL may be invalid or the server is not responding."
-                                }
+
                                 // Parsing errors (error codes 4000-4999)
                                 error.errorCode in 4000..4999 -> {
                                     "Unsupported audio format. The stream format may not be supported."
@@ -180,9 +215,9 @@ class RadioPlayerViewModel @Inject constructor(
                             // Use MediaSource for better HTTP streaming support
                             // Get URI from MediaItem or parse from URL
                             val uri = try {
-                                it.localConfiguration?.uri ?: Uri.parse(url)
-                            } catch (e: Exception) {
-                                Uri.parse(url)
+                                it.localConfiguration?.uri ?: url.toUri()
+                            } catch (_: Exception) {
+                                url.toUri()
                             }
                             Log.d(TAG, "Creating MediaSource for URI: $uri")
                             val mediaSource = createMediaSource(uri)
@@ -192,6 +227,7 @@ class RadioPlayerViewModel @Inject constructor(
                             player.play()
                             _currentUrl.value = url
                             _stationName.value = stationName
+                            startNotificationService()
                             Log.d(TAG, "Playback started successfully with MediaSource")
                         } catch (e: Exception) {
                             Log.e(TAG, "Error setting media source: ${e.message}", e)
@@ -203,6 +239,7 @@ class RadioPlayerViewModel @Inject constructor(
                                 player.play()
                                 _currentUrl.value = url
                                 _stationName.value = stationName
+                                startNotificationService()
                                 Log.d(TAG, "Playback started with fallback MediaItem")
                             } catch (fallbackError: Exception) {
                                 Log.e(
@@ -235,7 +272,7 @@ class RadioPlayerViewModel @Inject constructor(
             // Properly parse the URI to handle special characters like semicolons
             // The semicolon in the URL path needs to be preserved
             // Try parsing directly first
-            var uri = Uri.parse(url)
+            var uri = url.toUri()
             Log.d(TAG, "Original URL: $url")
             Log.d(TAG, "Parsed URI (first attempt): $uri")
             
@@ -243,7 +280,7 @@ class RadioPlayerViewModel @Inject constructor(
             if (!uri.toString().contains(";") && url.contains(";")) {
                 // The semicolon might have been lost, try encoding the path
                 val encodedUrl = url.replace(";", "%3B")
-                uri = Uri.parse(encodedUrl)
+                uri = encodedUrl.toUri()
                 Log.d(TAG, "Encoded URL: $encodedUrl")
                 Log.d(TAG, "Parsed URI (after encoding): $uri")
             }
@@ -367,6 +404,7 @@ class RadioPlayerViewModel @Inject constructor(
                         }
                         _currentUrl.value = firstStream.url
                         _stationName.value = firstStream.name ?: stationName
+                        startNotificationService()
                     } ?: run {
                         _errorMessage.value = "Failed to create media item from M3U stream"
                     }
@@ -393,6 +431,7 @@ class RadioPlayerViewModel @Inject constructor(
         _currentUrl.value = null
         _stationName.value = null
         _isPlaying.value = false
+        stopNotificationService()
     }
 
     fun togglePlayPause() {
@@ -407,8 +446,47 @@ class RadioPlayerViewModel @Inject constructor(
 
     fun getPlayer(): ExoPlayer? = exoPlayer
 
+    private fun startNotificationService() {
+        val context = getApplication<Application>()
+        val intent = Intent(context, RadioPlayerService::class.java)
+        
+        if (!serviceBound) {
+            context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        }
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent)
+        } else {
+            context.startService(intent)
+        }
+        
+        // Update service with current info
+        viewModelScope.launch {
+            // Wait a bit for service to bind
+            kotlinx.coroutines.delay(100)
+            val service = radioPlayerService
+            service?.let {
+                exoPlayer?.let { player -> it.setPlayer(player) }
+                _stationName.value?.let { stationName -> it.updateStationInfo(stationName) }
+            }
+        }
+    }
+
+    private fun stopNotificationService() {
+        if (serviceBound) {
+            val context = getApplication<Application>()
+            context.unbindService(serviceConnection)
+            serviceBound = false
+        }
+        val context = getApplication<Application>()
+        val intent = Intent(context, RadioPlayerService::class.java)
+        context.stopService(intent)
+        radioPlayerServiceRef = null
+    }
+
     override fun onCleared() {
         super.onCleared()
+        stopNotificationService()
         exoPlayer?.release()
         exoPlayer = null
     }

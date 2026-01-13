@@ -104,6 +104,9 @@ dependencies {
     implementation("androidx.media3:media3-ui:$media3Version")
     implementation("androidx.media3:media3-common:$media3Version")
     implementation("androidx.media3:media3-session:$media3Version")
+    
+    // Media session for notifications
+    implementation("androidx.media:media:1.7.0")
 
     //implementation("com.facebook:stickerpackvalidator:1.0.0")
     //implementation("org.jetbrains.kotlinx:kotlinx-parcelize-runtime:1.9.0")
