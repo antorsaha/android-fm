@@ -23,6 +23,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.saha.androidfm.services.RadioPlayerService
+import com.saha.androidfm.utils.helpers.AppHelper
 import com.saha.androidfm.utils.helpers.M3UParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -455,6 +456,13 @@ class RadioPlayerViewModel @Inject constructor(
 
     private fun startNotificationService() {
         val context = getApplication<Application>()
+        
+        // Check notification permission for Android 13+
+        if (!AppHelper.hasNotificationPermission(context)) {
+            Log.w(TAG, "Notification permission not granted. Notifications may not work properly.")
+            // Continue anyway - foreground service will still work, but notification might not show
+        }
+        
         val intent = Intent(context, RadioPlayerService::class.java)
         
         if (!serviceBound) {

@@ -2,8 +2,11 @@ package com.saha.androidfm.utils.helpers
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
+import androidx.core.content.ContextCompat
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -36,6 +39,22 @@ object AppHelper {
 
     fun getCurrentYear(): Int {
         return Calendar.getInstance().get(Calendar.YEAR)
+    }
+
+    /**
+     * Check if notification permission is granted
+     * For Android 13+ (API 33+), POST_NOTIFICATIONS permission is required
+     */
+    fun hasNotificationPermission(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            // For Android 12 and below, notification permission is granted by default
+            true
+        }
     }
 
     fun shareApp(context: Context) {
