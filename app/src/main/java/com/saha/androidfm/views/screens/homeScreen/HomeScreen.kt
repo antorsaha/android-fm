@@ -118,7 +118,6 @@ fun HomeScreen(navController: NavController) {
                 startDestination = home.route,
                 modifier = Modifier
                     .padding(paddingValues)
-                    .padding(horizontal = 16.dp)
             ) {
                 composable(home.route, enterTransition = {
                     slideIntoContainer(

@@ -103,9 +103,5 @@ object AppHelper {
         })
     }
 
-    fun getInspireMePrompt(): String {
-
-        return AppConstants.inspireMePrompts.random().trim()
-    }
 
 }

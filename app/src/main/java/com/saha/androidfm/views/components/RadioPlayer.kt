@@ -1,5 +1,6 @@
 package com.saha.androidfm.views.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -13,13 +14,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.saha.androidfm.R
 import com.saha.androidfm.ui.theme.*
 import com.saha.androidfm.ui.theme.white
+import com.saha.androidfm.utils.helpers.AppConstants
 import com.saha.androidfm.viewmodels.RadioPlayerViewModel
 
 @Composable
@@ -34,10 +40,7 @@ fun RadioPlayer(
     val errorMessage by viewModel.errorMessage.collectAsState()
     val playbackError by viewModel.playbackError.collectAsState()
     
-    var urlInput by remember { mutableStateOf("") }
-    var showUrlInput by remember { mutableStateOf(false) }
-    
-    Column(
+    /*Column(
         modifier = modifier
             .fillMaxWidth()
             .background(surface)
@@ -59,7 +62,7 @@ fun RadioPlayer(
                 onUrlInputChange = { urlInput = it },
                 onPlayClick = {
                     if (urlInput.isNotBlank()) {
-                        viewModel.play(urlInput, "Custom Station")
+                        viewModel.play()
                         showUrlInput = false
                     }
                 },
@@ -79,7 +82,74 @@ fun RadioPlayer(
             onAddUrl = { showUrlInput = true },
             hasActiveStream = currentUrl != null
         )
+    }*/
+
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            HeightGap(8.dp)
+
+            Text(
+                text = stringResource(R.string.radio),
+                style = MaterialTheme.typography.titleMedium,
+                color = secondaryTextColor,
+                fontWeight = FontWeight.Normal
+            )
+
+            HeightGap(4.dp)
+            Text(
+                text = AppConstants.STATION_FREQUENCY,
+                style = MaterialTheme.typography.titleLarge,
+                fontSize = 48.sp
+            )
+
+            HeightGap(8.dp)
+
+            Text(
+                text = stringResource(R.string.mhz),
+                style = MaterialTheme.typography.titleMedium,
+                color = secondaryTextColor,
+                fontWeight = FontWeight.Normal
+            )
+
+            HeightGap(24.dp)
+
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    //.padding(horizontal = 16.dp)
+                    .background(
+                        color = surface,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Image(
+                    painter = painterResource(R.drawable.ic_launcher_foreground),
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp)
+                )
+
+                WidthGap(4.dp)
+
+                Text(
+                    text = AppConstants.STATION_NAME,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+            }
+        }
+
+
+
     }
+
 }
 
 @Composable

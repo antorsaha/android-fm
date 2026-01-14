@@ -34,6 +34,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 import androidx.core.net.toUri
+import com.saha.androidfm.utils.helpers.AppConstants
 
 private const val TAG = "RadioPlayerViewModel"
 
@@ -181,7 +182,11 @@ class RadioPlayerViewModel @Inject constructor(
     }
 
     @OptIn(UnstableApi::class)
-    fun play(url: String, stationName: String? = null) {
+    fun play() {
+
+        val url = AppConstants.STATION_SEAM_URL
+        val stationName = AppConstants.STATION_NAME
+
         viewModelScope.launch {
             try {
                 _errorMessage.value = null
@@ -440,6 +445,8 @@ class RadioPlayerViewModel @Inject constructor(
         } else {
             if (_currentUrl.value != null) {
                 resume()
+            }else{
+                play()
             }
         }
     }

@@ -37,4 +37,9 @@
     <string name="no_history_found">No history found</string>
     <string name="no_favorite_found">No favorite found</string>
 
+    <!--Radio strings-->
+
+    <string name="radio">RADIO</string>
+    <string name="mhz">MHz</string>
+
 </resources>
