@@ -48,7 +48,7 @@ import com.saha.androidfm.ui.theme.secondaryTextColor
 import com.saha.androidfm.ui.theme.surface
 import com.saha.androidfm.viewmodels.RadioPlayerViewModel
 import com.saha.androidfm.views.screens.SettingScreen
-import com.saha.androidfm.views.screens.history.HistoryScreen
+import com.saha.androidfm.views.screens.lifeSteam.LiveSteamScreen
 
 object HomeScreenRoute
 
@@ -160,7 +160,7 @@ fun HomeScreen(navController: NavController) {
                             AnimatedContentTransitionScope.SlideDirection.Right,
                             animationSpec = tween(animationDuration)
                         )
-                    }) { HistoryScreen(navControllerBottomNavigation) }
+                    }) { LiveSteamScreen(navControllerBottomNavigation) }
                 composable(
                     settings.route, enterTransition = {
                         slideIntoContainer(

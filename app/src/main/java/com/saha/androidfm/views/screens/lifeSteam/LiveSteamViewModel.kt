@@ -1,4 +1,4 @@
-package com.saha.androidfm.views.screens.history
+package com.saha.androidfm.views.screens.lifeSteam
 
 import android.app.Application
 import android.net.Uri
@@ -17,7 +17,7 @@ import javax.inject.Inject
 private const val TAG = "HistoryViewModel"
 
 @HiltViewModel
-class HistoryViewModel @Inject constructor(
+class LiveSteamViewModel @Inject constructor(
     application: Application,
     private val apiRepo: Repo,
 ) : AndroidViewModel(application) {

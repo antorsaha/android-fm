@@ -19,7 +19,7 @@ import com.saha.androidfm.views.dialogs.AppLoader
 import com.saha.androidfm.views.dialogs.IosConfirmationDialog
 import com.saha.androidfm.views.dialogs.IosErrorDialog
 import com.saha.androidfm.views.dialogs.IosSuccessDialog
-import com.saha.androidfm.views.screens.history.HistoryScreen
+import com.saha.androidfm.views.screens.lifeSteam.LiveSteamScreen
 import com.saha.androidfm.views.screens.homeScreen.HomeScreen
 import com.saha.androidfm.views.screens.homeScreen.HomeScreenRoute
 
@@ -77,7 +77,7 @@ fun App() {
     ) {
 
         composable("profile") {
-            HistoryScreen(navController)
+            LiveSteamScreen(navController)
         }
 
         composable<NavigationWrapper>(
