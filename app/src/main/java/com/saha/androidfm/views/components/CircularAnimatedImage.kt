@@ -1,7 +1,7 @@
 package com.saha.androidfm.views.components
 
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 @Composable
 fun CircularAnimatedImage(
@@ -31,49 +32,20 @@ fun CircularAnimatedImage(
 ) {
     var currentRotation by remember { mutableStateOf(0f) }
     var animationStartTime by remember { mutableStateOf(0L) }
-    var hasCompletedRotations by remember { mutableStateOf(false) }
-    var wasPlaying by remember { mutableStateOf(false) }
+    var isAnimating by remember { mutableStateOf(false) }
     
-    // Reset when playing state changes
+    // Single LaunchedEffect to handle both reset and animation
     LaunchedEffect(isPlaying) {
-        if (isPlaying && !wasPlaying) {
-            // Start new animation cycle - always reset rotation when starting
+        if (isPlaying) {
+            // Start new animation cycle - reset rotation when starting
             currentRotation = 0f
             animationStartTime = System.currentTimeMillis()
-            hasCompletedRotations = false
-        } else if (!isPlaying && wasPlaying) {
-            // When pausing, reset to 0 degrees (show original image)
-            currentRotation = 0f
-            hasCompletedRotations = true
-        }
-        wasPlaying = isPlaying
-    }
-    
-    // Animate the rotation smoothly
-    val animatedRotation by animateFloatAsState(
-        targetValue = currentRotation,
-        animationSpec = if (isPlaying && !hasCompletedRotations) {
-            tween(
-                durationMillis = 16, // Smooth 60fps animation
-                easing = LinearEasing
-            )
-        } else {
-            // When paused, animate back to 0 degrees (original image)
-            tween(
-                durationMillis = 300, // Smooth transition back to 0
-                easing = LinearEasing
-            )
-        },
-        label = "rotation_animation"
-    )
-    
-    // Update rotation continuously for spinning motion when playing
-    LaunchedEffect(isPlaying, hasCompletedRotations) {
-        if (isPlaying && !hasCompletedRotations) {
+            isAnimating = true
+            
             val totalDuration = animationDuration * repetitions
             val totalDegrees = 360f * repetitions // 2 full rotations = 720 degrees
             
-            while (isPlaying && !hasCompletedRotations) {
+            while (isActive && isAnimating) {
                 val elapsed = System.currentTimeMillis() - animationStartTime
                 val progress = (elapsed.toFloat() / totalDuration.toFloat()).coerceIn(0f, 1f)
                 
@@ -81,20 +53,40 @@ fun CircularAnimatedImage(
                 
                 // Check if we've completed all rotations
                 if (progress >= 1f) {
-                    hasCompletedRotations = true
-                    currentRotation = totalDegrees // Final position (720 degrees for 2 rotations)
+                    isAnimating = false
+                    currentRotation = totalDegrees // Final position
                     break
                 }
-                
-                // Stop if audio stopped - will reset to 0 in LaunchedEffect
-                if (!isPlaying) {
-                    break
-                }
-                
-                delay(16) // ~60fps
+
+                // Update at ~30fps - smooth enough for rotation animation
+                delay(33)
             }
+        } else {
+            // When pausing, immediately stop animation and reset
+            isAnimating = false
+            currentRotation = 0f
         }
     }
+    
+    // When paused, target is always 0f (original image)
+    // When playing, target is currentRotation
+    val rotationTarget = if (isPlaying && isAnimating) currentRotation else 0f
+    
+    // Animate rotation smoothly when playing, snap when pausing
+    val animatedRotation by animateFloatAsState(
+        targetValue = rotationTarget,
+        animationSpec = if (isPlaying && isAnimating) {
+            // Use short duration for responsive animation
+            tween(
+                durationMillis = 50,
+                easing = androidx.compose.animation.core.LinearEasing
+            )
+        } else {
+            // When paused, use snap for instant reset to 0
+            snap<Float>()
+        },
+        label = "rotation_animation"
+    )
     
     Box(
         modifier = modifier
@@ -104,7 +96,7 @@ fun CircularAnimatedImage(
             contentDescription = contentDescription,
             modifier = Modifier
                 .size(imageSize)
-                .rotate(animatedRotation) // Rotate in place
+                .rotate(animatedRotation)
         )
     }
 }

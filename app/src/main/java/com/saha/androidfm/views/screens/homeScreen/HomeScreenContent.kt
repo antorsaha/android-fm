@@ -3,6 +3,7 @@ package com.saha.androidfm.views.screens.homeScreen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -59,7 +63,10 @@ fun HomeScreenContent(
 ) {
     val context = LocalContext.current
     val isPlaying by radioPlayerViewModel.isPlaying.collectAsState()
-    AppConstants.STATION_FREQUENCY.toFloatOrNull() ?: 88.9f
+    val coroutineScope = rememberCoroutineScope()
+    
+    // painterResource is already optimized and cached by Compose internally
+    val imagePainter = painterResource(R.drawable.img_denneryfm)
 
     Box(
         modifier = Modifier
@@ -91,7 +98,7 @@ fun HomeScreenContent(
 
 
                 CircularAnimatedImage(
-                    painter = painterResource(R.drawable.img_denneryfm),
+                    painter = imagePainter,
                     isPlaying = isPlaying,
                     modifier = Modifier.size(200.dp),
                     imageSize = 200.dp,
@@ -151,8 +158,14 @@ fun HomeScreenContent(
                             color = accent,
                             shape = CircleShape
                         )
-                        .clickable {
-                            radioPlayerViewModel.togglePlayPause()
+                        .clickable(
+                            indication = null, // Remove ripple for instant feedback
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            // Launch in coroutine scope to ensure non-blocking
+                            coroutineScope.launch {
+                                radioPlayerViewModel.togglePlayPause()
+                            }
                         },
                     contentAlignment = Alignment.Center
                 ) {
