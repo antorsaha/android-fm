@@ -85,6 +85,132 @@ object AppHelper {
         }
     }
 
+    /**
+     * Get the app version name from PackageInfo
+     * Returns version name like "1.0" or "Unknown" if unable to retrieve
+     */
+    fun getVersionName(context: Context): String {
+        return try {
+            val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getPackageInfo(
+                    context.packageName,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageInfo(context.packageName, 0)
+            }
+            packageInfo.versionName ?: "Unknown"
+        } catch (e: PackageManager.NameNotFoundException) {
+            Logger.e("Error getting version name: ${e.message}", e, tag = "AppHelper")
+            "Unknown"
+        }
+    }
+
+    /**
+     * Open social media link - tries to open in app first, falls back to browser
+     * @param context Context
+     * @param url Web URL of the social media profile
+     * @param appPackage Package name of the social media app (e.g., "com.facebook.katana")
+     * @param appUri Deep link URI for the app (optional)
+     */
+    fun openSocialMedia(
+        context: Context,
+        url: String,
+        appPackage: String? = null,
+        appUri: String? = null
+    ) {
+        try {
+            // Try to open in app first if app URI is provided
+            if (!appUri.isNullOrEmpty() && appPackage != null && isAppInstalled(context, appPackage)) {
+                try {
+                    val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse(appUri)).apply {
+                        setPackage(appPackage)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(appIntent)
+                    return
+                } catch (e: Exception) {
+                    // If app intent fails, fall through to browser
+                    Logger.d("App intent failed, opening in browser", tag = "AppHelper")
+                }
+            }
+
+            // Fall back to opening in browser
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(browserIntent)
+        } catch (e: Exception) {
+            Logger.e("Error opening social media: ${e.message}", e, tag = "AppHelper")
+        }
+    }
+
+    /**
+     * Check if an app is installed
+     */
+    private fun isAppInstalled(context: Context, packageName: String): Boolean {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getPackageInfo(
+                    packageName,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageInfo(packageName, 0)
+            }
+            true
+        } catch (e: PackageManager.NameNotFoundException) {
+            false
+        }
+    }
+
+    /**
+     * Open Facebook profile - tries app first, then browser
+     */
+    fun openFacebook(context: Context, facebookUrl: String) {
+        // Extract Facebook page name from URL
+        val pageName = facebookUrl.substringAfterLast("/")
+        val appUri = "fb://facewebmodal/f?href=$facebookUrl"
+        openSocialMedia(
+            context = context,
+            url = facebookUrl,
+            appPackage = "com.facebook.katana",
+            appUri = appUri
+        )
+    }
+
+    /**
+     * Open Instagram profile - tries app first, then browser
+     */
+    fun openInstagram(context: Context, instagramUrl: String) {
+        // Extract Instagram username from URL
+        val username = instagramUrl.substringAfterLast("/").removeSuffix("/")
+        val appUri = "instagram://user?username=$username"
+        openSocialMedia(
+            context = context,
+            url = instagramUrl,
+            appPackage = "com.instagram.android",
+            appUri = appUri
+        )
+    }
+
+    /**
+     * Open TikTok profile - tries app first, then browser
+     */
+    fun openTikTok(context: Context, tiktokUrl: String) {
+        // Extract TikTok username from URL (e.g., @denneryfm)
+        val username = tiktokUrl.substringAfterLast("@").removeSuffix("/")
+        val appUri = "tiktok://user?username=$username"
+        openSocialMedia(
+            context = context,
+            url = tiktokUrl,
+            appPackage = "com.zhiliaoapp.musically",
+            appUri = appUri
+        )
+    }
+
     fun setNetworkConnection(isConnected: Boolean) {
         Logger.d(tag = "HomeScreen", message = "setNetworkConnection: $isConnected")
         counterHelper.stopCountdown()

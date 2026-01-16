@@ -17,9 +17,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.VideoCameraFront
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -52,6 +54,7 @@ import com.saha.androidfm.views.screens.lifeSteam.LiveSteamScreen
 
 object HomeScreenRoute
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
     LocalContext.current
@@ -60,7 +63,7 @@ fun HomeScreen(navController: NavController) {
 
     val home = Screen("home", "Radio", Icons.Default.Radio)
     val history = Screen("history", "Live Stream", Icons.Default.VideoCameraFront)
-    val settings = Screen("settings", "More", Icons.Default.MoreVert)
+    val settings = Screen("settings", "More", Icons.Filled.Menu)
 
     val items = listOf(
         home, history, settings
