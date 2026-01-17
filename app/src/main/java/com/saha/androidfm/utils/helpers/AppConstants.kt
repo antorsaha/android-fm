@@ -21,4 +21,9 @@ object AppConstants{
     const val FACEBOOK_URL = "https://www.facebook.com/denneryfm"
     const val INSTAGRAM_URL = "https://www.instagram.com/denneryfm/"
     const val TIKTOK_URL = "https://www.tiktok.com/@denneryfm"
+    
+    // AdMob Configuration
+    // Replace with your actual values from AdMob console
+    const val ADMOB_APPLICATION_ID = "ca-app-pub-3940256099942544~3347511713" // Test application ID
+    const val BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111" // Test banner ad unit
 }

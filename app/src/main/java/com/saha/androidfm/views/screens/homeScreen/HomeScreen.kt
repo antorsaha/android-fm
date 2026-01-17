@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,7 +49,9 @@ import com.saha.androidfm.ui.theme.accent
 import com.saha.androidfm.ui.theme.backgroundColor
 import com.saha.androidfm.ui.theme.secondaryTextColor
 import com.saha.androidfm.ui.theme.surface
+import com.saha.androidfm.utils.helpers.AppConstants
 import com.saha.androidfm.viewmodels.RadioPlayerViewModel
+import com.saha.androidfm.views.components.BannerAd
 import com.saha.androidfm.views.screens.SettingScreen
 import com.saha.androidfm.views.screens.lifeSteam.LiveSteamScreen
 
@@ -89,19 +92,34 @@ fun HomeScreen(navController: NavController) {
         Scaffold(
             containerColor = backgroundColor,
             bottomBar = {
-                FloatingBottomNavigationBar(
-                    items = items,
-                    currentRoute = currentDestination?.route,
-                    onItemClick = { screen ->
-                        navControllerBottomNavigation.navigate(screen.route) {
-                            popUpTo(navControllerBottomNavigation.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                Column {
+                    // Show banner ad only for Radio and Live Stream screens
+                    val shouldShowAd = currentDestination?.route == home.route || 
+                                      currentDestination?.route == history.route
+                    
+                    if (shouldShowAd) {
+                        BannerAd(
+                            adUnitId = AppConstants.BANNER_AD_UNIT_ID,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
                     }
-                )
+                    
+                    FloatingBottomNavigationBar(
+                        items = items,
+                        currentRoute = currentDestination?.route,
+                        onItemClick = { screen ->
+                            navControllerBottomNavigation.navigate(screen.route) {
+                                popUpTo(navControllerBottomNavigation.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
             }) { paddingValues ->
 
             NavHost(
