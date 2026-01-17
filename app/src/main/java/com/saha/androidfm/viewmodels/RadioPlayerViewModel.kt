@@ -23,9 +23,12 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.saha.androidfm.services.RadioPlayerService
+import com.saha.androidfm.utils.helpers.AppHelper
 import com.saha.androidfm.utils.helpers.M3UParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -92,6 +95,11 @@ class RadioPlayerViewModel @Inject constructor(
 
     private val _playbackError = MutableStateFlow<String?>(null)
     val playbackError: StateFlow<String?> = _playbackError.asStateFlow()
+
+    private val _sleepTimerRemainingMillis = MutableStateFlow<Long?>(null)
+    val sleepTimerRemainingMillis: StateFlow<Long?> = _sleepTimerRemainingMillis.asStateFlow()
+
+    private var sleepTimerJob: Job? = null
 
     init {
         initializePlayer()
@@ -455,6 +463,13 @@ class RadioPlayerViewModel @Inject constructor(
 
     private fun startNotificationService() {
         val context = getApplication<Application>()
+        
+        // Check notification permission for Android 13+
+        if (!AppHelper.hasNotificationPermission(context)) {
+            Log.w(TAG, "Notification permission not granted. Notifications may not work properly.")
+            // Continue anyway - foreground service will still work, but notification might not show
+        }
+        
         val intent = Intent(context, RadioPlayerService::class.java)
         
         if (!serviceBound) {
@@ -491,8 +506,31 @@ class RadioPlayerViewModel @Inject constructor(
         radioPlayerServiceRef = null
     }
 
+    fun setSleepTimer(minutes: Int) {
+        sleepTimerJob?.cancel()
+        if (minutes <= 0) {
+            _sleepTimerRemainingMillis.value = null
+            return
+        }
+
+        val totalMillis = minutes * 60 * 1000L
+        _sleepTimerRemainingMillis.value = totalMillis
+
+        sleepTimerJob = viewModelScope.launch {
+            var remaining = totalMillis
+            while (remaining > 0) {
+                delay(1000)
+                remaining -= 1000
+                _sleepTimerRemainingMillis.value = remaining
+            }
+            _sleepTimerRemainingMillis.value = null
+            stop()
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
+        sleepTimerJob?.cancel()
         stopNotificationService()
         exoPlayer?.release()
         exoPlayer = null

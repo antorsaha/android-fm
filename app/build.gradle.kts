@@ -108,6 +108,7 @@ dependencies {
     // Media session for notifications
     implementation("androidx.media:media:1.7.0")
 
-    //implementation("com.facebook:stickerpackvalidator:1.0.0")
-    //implementation("org.jetbrains.kotlinx:kotlinx-parcelize-runtime:1.9.0")
+    // Google AdMob
+    implementation("com.google.android.gms:play-services-ads:23.0.0")
+
 }

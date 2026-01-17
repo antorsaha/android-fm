@@ -16,7 +16,7 @@ private val DarkColorScheme = darkColorScheme(
     tertiary = Pink80,
 
     background = backgroundColor,
-    surface = backgroundColor,
+    surface = surface,
     primaryContainer = cardBackgroundColor
 )
 
@@ -26,7 +26,7 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Pink40,
 
     background = backgroundColor,
-    surface = backgroundColor,
+    surface = surface,
     primaryContainer = cardBackgroundColor,
 
     //onSurface = cardBackgroundColor

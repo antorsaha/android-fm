@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ai sticker maker"
+rootProject.name = "Single station"
 include(":app")

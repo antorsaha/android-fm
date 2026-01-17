@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Android FM</string>
+    <string name="app_name">Dennery FM</string>
 
     <string name="pro">Pro</string>
     <string name="history">History</string>
@@ -41,5 +41,8 @@
 
     <string name="radio">RADIO</string>
     <string name="mhz">MHz</string>
+    <string name="live_stream">Live Stream</string>
+    <string name="steam_not_available_message">Your live stream will play automatically as soon as it\'s available.\nGet ready to be part of the action!</string>
+    <string name="more">More</string>
 
 </resources>

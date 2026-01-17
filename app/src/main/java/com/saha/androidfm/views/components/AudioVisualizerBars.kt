@@ -1,8 +1,5 @@
 package com.saha.androidfm.views.components
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +15,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import com.saha.androidfm.ui.theme.accent
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlin.math.abs
 import kotlin.random.Random
 
 @Composable
@@ -29,41 +28,90 @@ fun AudioVisualizerBars(
     minBarHeight: Float = 0.1f,
     maxBarHeight: Float = 1.0f
 ) {
-    // Store target heights for each bar
+    // Use FloatArray for better performance - avoids list allocations
+    var currentHeights by remember {
+        mutableStateOf(FloatArray(barCount) { minBarHeight })
+    }
+
+    // Store target heights for smooth interpolation
     var targetHeights by remember {
-        mutableStateOf(List(barCount) { minBarHeight })
+        mutableStateOf(FloatArray(barCount) { minBarHeight })
     }
 
-    // Remember animation durations for each bar to keep them consistent
-    val animationDurations = remember {
-        List(barCount) { Random.nextInt(200, 600) }
-    }
+    // Smooth animation interpolation factor
+    val animationSpeed = 0.15f
+    var lastTargetUpdate by remember { mutableStateOf(0L) }
+    var lastFrameTime by remember { mutableStateOf(0L) }
 
-    // Create animated states for each bar - call animateFloatAsState in composable context
-    val animatedHeights = List(barCount) { index ->
-        val target = targetHeights[index]
-        animateFloatAsState(
-            targetValue = target,
-            animationSpec = tween(
-                durationMillis = animationDurations[index],
-                easing = LinearEasing
-            ),
-            label = "bar_$index"
-        )
-    }
-
-    // Continuously update target heights when playing
+    // Continuously update heights when playing - using smooth interpolation
     LaunchedEffect(isPlaying) {
         if (isPlaying) {
-            while (true) {
-                targetHeights = List(barCount) {
-                    Random.nextFloat() * (maxBarHeight - minBarHeight) + minBarHeight
+            lastTargetUpdate = System.currentTimeMillis()
+            lastFrameTime = System.currentTimeMillis()
+            // Initialize target heights
+            val newTargets = FloatArray(barCount) {
+                Random.nextFloat() * (maxBarHeight - minBarHeight) + minBarHeight
+            }
+            targetHeights = newTargets
+            
+            while (isActive) {
+                val now = System.currentTimeMillis()
+                val frameDelta = now - lastFrameTime
+                lastFrameTime = now
+                
+                // Update target heights every 150-250ms (less frequent updates)
+                if (now - lastTargetUpdate > 200) {
+                    val newTargets = FloatArray(barCount) {
+                        Random.nextFloat() * (maxBarHeight - minBarHeight) + minBarHeight
+                    }
+                    targetHeights = newTargets
+                    lastTargetUpdate = now
                 }
-                delay(Random.nextLong(100, 300))
+                
+                // Smoothly interpolate current heights towards targets
+                // Use FloatArray operations for better performance
+                val newHeights = FloatArray(barCount) { index ->
+                    val current = currentHeights[index]
+                    val target = targetHeights[index]
+                    val diff = target - current
+                    // Smooth interpolation with frame-time aware speed
+                    if (abs(diff) > 0.01f) {
+                        current + diff * animationSpeed
+                    } else {
+                        target
+                    }
+                }
+                currentHeights = newHeights
+                
+                // Update at ~30fps instead of 60fps to reduce recomposition overhead
+                // Still smooth enough for visual effect
+                delay(33)
             }
         } else {
-            // Animate to minimum height when stopped
-            targetHeights = List(barCount) { minBarHeight }
+            // When paused, quickly reset to minimum (fewer frames for faster response)
+            var hasChanges = true
+            var iterations = 0
+            while (isActive && hasChanges && iterations < 10) { // Limit iterations to avoid blocking
+                hasChanges = false
+                val newHeights = FloatArray(barCount) { index ->
+                    val current = currentHeights[index]
+                    val diff = minBarHeight - current
+                    if (abs(diff) > 0.01f) {
+                        hasChanges = true
+                        current + diff * (animationSpeed * 2f) // Faster when pausing
+                    } else {
+                        minBarHeight
+                    }
+                }
+                currentHeights = newHeights
+                iterations++
+                if (hasChanges) {
+                    delay(16)
+                }
+            }
+            // Final reset - instant
+            currentHeights = FloatArray(barCount) { minBarHeight }
+            targetHeights = FloatArray(barCount) { minBarHeight }
         }
     }
 
@@ -75,11 +123,13 @@ fun AudioVisualizerBars(
             val spacing = barWidth * 0.15f // 15% spacing between bars
             val actualBarWidth = barWidth - spacing
 
-            animatedHeights.forEachIndexed { index, animatedHeight ->
-                val barHeight = animatedHeight.value * height
+            // Direct array access for better performance
+            for (index in 0 until barCount) {
+                val barHeightRatio = currentHeights[index]
+                val barHeight = barHeightRatio * height
 
                 val x = index * barWidth + spacing / 2
-                // Position bar from bottom - all bars have bottom at same position
+                // Position bar from bottom
                 val barTop = height - barHeight
 
                 // Draw bar

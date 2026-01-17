@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -19,6 +20,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ProjectBoilarplate"
         tools:targetApi="31">
+        
+        <!-- AdMob App ID - Must match AppConstants.ADMOB_APPLICATION_ID -->
+        <!-- Update in both AppConstants.kt and this manifest -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -2,32 +2,62 @@ package com.saha.androidfm.views
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.google.gson.Gson
 import com.saha.androidfm.utils.helpers.ConfirmationDialogSpec
 import com.saha.androidfm.utils.helpers.DialogManager
 import com.saha.androidfm.utils.helpers.ErrorDialogSpec
 import com.saha.androidfm.utils.helpers.LoadingManager
+import com.saha.androidfm.utils.helpers.PreferencesManager
 import com.saha.androidfm.utils.helpers.SuccessDialogSpec
 import com.saha.androidfm.utils.navigation.NavigationWrapper
+import com.saha.androidfm.views.screens.onboarding.OnboardingViewModel
 import com.saha.androidfm.views.dialogs.AppLoader
 import com.saha.androidfm.views.dialogs.IosConfirmationDialog
 import com.saha.androidfm.views.dialogs.IosErrorDialog
 import com.saha.androidfm.views.dialogs.IosSuccessDialog
-import com.saha.androidfm.views.screens.history.HistoryScreen
+import com.saha.androidfm.views.screens.WebViewScreen
+import com.saha.androidfm.views.screens.WebViewScreenRoute
+import com.saha.androidfm.views.screens.lifeSteam.LiveSteamScreen
 import com.saha.androidfm.views.screens.homeScreen.HomeScreen
 import com.saha.androidfm.views.screens.homeScreen.HomeScreenRoute
+import com.saha.androidfm.views.screens.onboarding.OnboardingScreen
+import com.saha.androidfm.views.screens.onboarding.OnboardingScreenRoute
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App() {
     val navController = rememberNavController()
+    val context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager.create(context) }
     val isLoading by LoadingManager.isLoading.collectAsState()
     val centralDialogSpec by DialogManager.dialog.collectAsState()
+
+    // Determine start destination based on onboarding completion
+    val startDestination = remember {
+        if (preferencesManager.isOnboardingCompleted()) {
+            NavigationWrapper(
+                data = null,
+                screenName = HomeScreenRoute::class.java.name
+            )
+        } else {
+            NavigationWrapper(
+                data = null,
+                screenName = OnboardingScreenRoute::class.java.name
+            )
+        }
+    }
 
     val animationDuration = 500
 
@@ -71,13 +101,12 @@ fun App() {
     }
 
     NavHost(
-        navController = navController, startDestination = NavigationWrapper(
-            data = null, screenName = HomeScreenRoute::class.java.name
-        )
+        navController = navController,
+        startDestination = startDestination
     ) {
 
         composable("profile") {
-            HistoryScreen(navController)
+            LiveSteamScreen(navController)
         }
 
         composable<NavigationWrapper>(
@@ -109,118 +138,35 @@ fun App() {
             val args = it.toRoute<NavigationWrapper>()
 
             when (args.screenName) {
+                OnboardingScreenRoute::class.java.name -> {
+                    OnboardingScreen(
+                        navController = navController,
+                        onFinish = {
+                            // Navigate to home and remove onboarding from stack
+                            navController.navigate(
+                                NavigationWrapper(
+                                    data = null,
+                                    screenName = HomeScreenRoute::class.java.name
+                                )
+                            ) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
                 HomeScreenRoute::class.java.name -> {
                     HomeScreen(navController)
                 }
 
-                /*TestScreen::class.java.name -> {
-                    val stickerPack = remember {
-                        StickerPack(
-                            identifier = "sample_sticker_pack3",
-                            name = "ai sticker3",
-                            publisher = "ai antor publisher",
-                            trayImageFile = "sticker_1.webp",
-                            imageDataVersion = "1",
-                            stickers = listOf(
-                                Sticker(
-                                    imageFileName = "sticker_1.webp",
-                                    emojis = listOf("😀"),
-                                    accessibilityText = "Sticker 1",
-                                    drawableResId = R.drawable.sticker_1
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_2.webp",
-                                    emojis = listOf("😃"),
-                                    accessibilityText = "Sticker 2",
-                                    drawableResId = R.drawable.sticker_2
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_3.webp",
-                                    emojis = listOf("😄"),
-                                    accessibilityText = "Sticker 3",
-                                    drawableResId = R.drawable.sticker_3
-                                ),
-                                *//*Sticker(
-                                    imageFileName = "sticker_4.webp",
-                                    emojis = listOf("😁"),
-                                    accessibilityText = "Sticker 4",
-                                    drawableResId = R.drawable.sticker_4
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_5.webp",
-                                    emojis = listOf("😆"),
-                                    accessibilityText = "Sticker 5",
-                                    drawableResId = R.drawable.sticker_5
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_6.webp",
-                                    emojis = listOf("😅"),
-                                    accessibilityText = "Sticker 6",
-                                    drawableResId = R.drawable.sticker_6
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_7.webp",
-                                    emojis = listOf("😂"),
-                                    accessibilityText = "Sticker 7",
-                                    drawableResId = R.drawable.sticker_7
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_9.webp",
-                                    emojis = listOf("🤣"),
-                                    accessibilityText = "Sticker 9",
-                                    drawableResId = R.drawable.sticker_9
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_10.webp",
-                                    emojis = listOf("😊"),
-                                    accessibilityText = "Sticker 10",
-                                    drawableResId = R.drawable.sticker_10
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_11.webp",
-                                    emojis = listOf("😇"),
-                                    accessibilityText = "Sticker 11",
-                                    drawableResId = R.drawable.sticker_11
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_12.webp",
-                                    emojis = listOf("🙂"),
-                                    accessibilityText = "Sticker 12",
-                                    drawableResId = R.drawable.sticker_12
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_13.webp",
-                                    emojis = listOf("🙃"),
-                                    accessibilityText = "Sticker 13",
-                                    drawableResId = R.drawable.sticker_13
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_14.webp",
-                                    emojis = listOf("😉"),
-                                    accessibilityText = "Sticker 14",
-                                    drawableResId = R.drawable.sticker_14
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_15.webp",
-                                    emojis = listOf("😌"),
-                                    accessibilityText = "Sticker 15",
-                                    drawableResId = R.drawable.sticker_15
-                                ),
-                                Sticker(
-                                    imageFileName = "sticker_16.webp",
-                                    emojis = listOf("😍"),
-                                    accessibilityText = "Sticker 16",
-                                    drawableResId = R.drawable.sticker_16
-                                )*//*
-                            )
-                        )
+                WebViewScreenRoute::class.java.name -> {
+                    val data = if (args.data != null) {
+                        Gson().fromJson(args.data, WebViewScreenRoute::class.java)
+                    } else {
+                        throw Exception("WebViewScreenRoute data is null")
                     }
-
-                    StickerPackDetailsScreen(
-                        stickerPack = stickerPack,
-                        onBackClick = { navController.popBackStack() }
-                    )
-                }*/
+                    WebViewScreen(navController = navController, title = data.title, url = data.url)
+                }
 
                 else -> {
                     throw IllegalArgumentException("Unknown route: ${args.screenName}")

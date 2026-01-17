@@ -73,7 +73,7 @@ import com.saha.androidfm.ui.theme.cardBackgroundColor
 @Composable
 fun StickerItem(
     modifier: Modifier,
-    stickerResource: Int = R.drawable.sticker_1,
+    stickerResource: Int = R.drawable.img_denneryfm,
     imageUri: Uri? = null,
     isFavorites: Boolean = false,
     isHistory: Boolean = false,
