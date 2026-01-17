@@ -23,10 +23,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +61,16 @@ fun RadioScreen(
     val context = LocalContext.current
     val isPlaying by radioPlayerViewModel.isPlaying.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    
+    // Separate state for animations - updates with delay after actual playback state changes
+    var isAnimating by remember { mutableStateOf(isPlaying) }
+    
+    // Update animation state when playback state actually changes
+    LaunchedEffect(isPlaying) {
+        // Add a small delay to ensure the actual playback state is confirmed
+        delay(100) // 100ms delay to match actual playback state
+        isAnimating = isPlaying
+    }
     
     // painterResource is already optimized and cached by Compose internally
     val imagePainter = painterResource(R.drawable.img_denneryfm)
@@ -92,7 +106,7 @@ fun RadioScreen(
 
                 CircularAnimatedImage(
                     painter = imagePainter,
-                    isPlaying = isPlaying,
+                    isPlaying = isAnimating,
                     modifier = Modifier.size(200.dp),
                     imageSize = 200.dp,
                     animationDuration = 5000, // 5 seconds per rotation (slow)
@@ -108,7 +122,7 @@ fun RadioScreen(
 
             // Audio Visualizer Bars
             AudioVisualizerBars(
-                isPlaying = isPlaying,
+                isPlaying = isAnimating,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
@@ -157,13 +171,14 @@ fun RadioScreen(
                         ) {
                             // Launch in coroutine scope to ensure non-blocking
                             coroutineScope.launch {
+                                isAnimating = !isAnimating
                                 radioPlayerViewModel.togglePlayPause()
                             }
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        imageVector = if (isAnimating) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = if (isPlaying) "Pause" else "Play",
                         tint = primaryTextColor,
                         modifier = Modifier.size(36.dp)
