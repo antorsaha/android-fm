@@ -137,7 +137,6 @@ fun App() {
             when (args.screenName) {
                 OnboardingScreenRoute::class.java.name -> {
                     OnboardingScreen(
-                        navController = navController,
                         onFinish = {
                             // Navigate to home and remove onboarding from stack
                             navController.navigate(
