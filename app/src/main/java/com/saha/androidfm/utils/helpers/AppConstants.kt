@@ -9,18 +9,15 @@ object AppConstants{
     // Live Stream Video URL
     const val LIVE_STREAM_VIDEO_URL = "https://nmxlive.akamaized.net/hls/live/529965/Live_1/index.m3u8"
 
-    const val NEWS_URL = "https://www.dennery.fm/news/"
-    const val SCHEDULE_URL = "https://www.dennery.fm/mobileappschedule/"
-    const val EVENTS_URL = "https://www.dennery.fm/events/"
-    const val OUR_DJ_URL = "https://www.dennery.fm/our-dj/"
-    const val CONTACT_ADDRESS = "hello@denneryfm.com"
-    const val ABOUT_US_URL = "https://www.dennery.fm/about-us/"
-    const val PRIVACY_POLICY_URL = "https://www.dennery.fm/privacy-policy/"
-    const val TERMS_OF_USE_URL = "https://www.dennery.fm/terms-and-conditions/"
+    const val WEBSITE_URL = "https://www.google.com/"
+    const val CONTACT_ADDRESS = "abcfm@gmail.com"
+    const val ABOUT_US_URL = "https://www.google.com/"
+    const val PRIVACY_POLICY_URL = "https://www.google.com/"
+    const val TERMS_OF_USE_URL = "https://www.google.com/"
 
-    const val FACEBOOK_URL = "https://www.facebook.com/denneryfm"
-    const val INSTAGRAM_URL = "https://www.instagram.com/denneryfm/"
-    const val TIKTOK_URL = "https://www.tiktok.com/@denneryfm"
+    const val FACEBOOK_URL = "https://www.facebook.com/"
+    const val INSTAGRAM_URL = "https://www.instagram.com/"
+    const val TIKTOK_URL = "https://www.tiktok.com/"
     
     // Ad Network Configuration
     // Change this to switch between ad networks: AdNetwork.ADMOB, AdNetwork.META, or AdNetwork.UNITY

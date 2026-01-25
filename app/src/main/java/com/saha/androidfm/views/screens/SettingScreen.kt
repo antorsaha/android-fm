@@ -71,61 +71,15 @@ fun SettingScreen(parentNavController: NavController, navController: NavControll
         }
         HeightGap(24.dp)
 
-        // Explore Section
-        Text(
-            text = "Explore",
-            style = MaterialTheme.typography.bodyLarge.copy(
-                color = secondaryTextColor,
-                fontWeight = FontWeight.SemiBold
-            ),
-            modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
-        )
-
         SettingItem(
-            text = "News",
-            icon = Icons.Default.Article
+            text = "Visit Our Website",
+            icon = Icons.Default.Link
         ) {
-            navigateToWebView(parentNavController, "News", AppConstants.NEWS_URL)
+            // Open link in browser
+            AppHelper.openUrlInBrowser(context, AppConstants.WEBSITE_URL)
         }
 
         HeightGap(8.dp)
-
-        SettingItem(
-            text = "Schedule",
-            icon = Icons.Default.CalendarToday
-        ) {
-            navigateToWebView(parentNavController, "Schedule", AppConstants.SCHEDULE_URL)
-        }
-
-        HeightGap(8.dp)
-
-        SettingItem(
-            text = "Events",
-            icon = Icons.Default.Event
-        ) {
-            navigateToWebView(parentNavController, "Events", AppConstants.EVENTS_URL)
-        }
-
-        HeightGap(8.dp)
-
-        SettingItem(
-            text = "Our DJs",
-            icon = Icons.Default.People
-        ) {
-            navigateToWebView(parentNavController, "Our DJs", AppConstants.OUR_DJ_URL)
-        }
-
-        HeightGap(32.dp)
-
-        // Support Section
-        Text(
-            text = "Support",
-            style = MaterialTheme.typography.bodyLarge.copy(
-                color = secondaryTextColor,
-                fontWeight = FontWeight.SemiBold
-            ),
-            modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
-        )
 
         SettingItem(
             text = "Contact Us",
@@ -144,14 +98,6 @@ fun SettingScreen(parentNavController: NavController, navController: NavControll
             navigateToWebView(parentNavController, "About Us", AppConstants.ABOUT_US_URL)
         }
 
-        HeightGap(8.dp)
-
-        SettingItem(
-            text = "Share with Friends",
-            icon = Icons.Default.Share
-        ) {
-            AppHelper.shareApp(context)
-        }
 
         HeightGap(8.dp)
 
@@ -169,6 +115,15 @@ fun SettingScreen(parentNavController: NavController, navController: NavControll
             icon = Icons.Default.Description
         ) {
             navigateToWebView(parentNavController, "Terms of Use", AppConstants.TERMS_OF_USE_URL)
+        }
+
+        HeightGap(8.dp)
+
+        SettingItem(
+            text = "Share with Friends",
+            icon = Icons.Default.Share
+        ) {
+            AppHelper.shareApp(context)
         }
 
         HeightGap(32.dp)

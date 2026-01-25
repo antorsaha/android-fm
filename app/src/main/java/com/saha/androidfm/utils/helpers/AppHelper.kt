@@ -6,10 +6,13 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.core.content.ContextCompat
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import com.saha.androidfm.R
 import com.saha.androidfm.data.enums.NetworkState
 import com.saha.fairdrivepartnerapp.utils.helper.CounterHelper
 import java.io.File
@@ -63,7 +66,7 @@ object AppHelper {
             val playStoreUrl = "https://play.google.com/store/apps/details?id=$packageName"
 
             val shareMessage = """
-                🎵 Tune in to Dennery FM - The Best Music Lives Here! 🎵
+                🎵 Tune in to ${context.getString(R.string.app_name)} - The Best Music Lives Here! 🎵
                 
                 Download the app now and enjoy high-quality streaming!
                 
@@ -73,11 +76,11 @@ object AppHelper {
 
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
-                putExtra(Intent.EXTRA_SUBJECT, "Check out Dennery FM Radio App!")
+                putExtra(Intent.EXTRA_SUBJECT, "Check out ${context.getString(R.string.app_name)} App!")
                 putExtra(Intent.EXTRA_TEXT, shareMessage)
             }
 
-            val chooserIntent = Intent.createChooser(shareIntent, "Share Dennery FM")
+            val chooserIntent = Intent.createChooser(shareIntent, "Share ${context.getString(R.string.app_name)}")
             chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(chooserIntent)
         } catch (e: Exception) {
@@ -122,7 +125,11 @@ object AppHelper {
     ) {
         try {
             // Try to open in app first if app URI is provided
-            if (!appUri.isNullOrEmpty() && appPackage != null && isAppInstalled(context, appPackage)) {
+            if (!appUri.isNullOrEmpty() && appPackage != null && isAppInstalled(
+                    context,
+                    appPackage
+                )
+            ) {
                 try {
                     val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse(appUri)).apply {
                         setPackage(appPackage)
@@ -137,14 +144,25 @@ object AppHelper {
             }
 
             // Fall back to opening in browser
-            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(browserIntent)
+            openUrlInBrowser(context, url)
+
         } catch (e: Exception) {
             Logger.e("Error opening social media: ${e.message}", e, tag = "AppHelper")
         }
     }
+
+    /**
+     * Open a URL in the default browser
+     * @param context Context
+     * @param url URL to open
+     */
+    fun openUrlInBrowser(context: Context, url: String) {
+        val browserIntent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(browserIntent)
+    }
+
 
     /**
      * Check if an app is installed
@@ -171,7 +189,7 @@ object AppHelper {
      */
     fun openFacebook(context: Context, facebookUrl: String) {
         // Extract Facebook page name from URL
-        val pageName = facebookUrl.substringAfterLast("/")
+        facebookUrl.substringAfterLast("/")
         val appUri = "fb://facewebmodal/f?href=$facebookUrl"
         openSocialMedia(
             context = context,
@@ -221,7 +239,7 @@ object AppHelper {
                 putExtra(Intent.EXTRA_SUBJECT, "Contact Dennery FM")
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            
+
             val chooserIntent = Intent.createChooser(emailIntent, "Send Email")
             chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(chooserIntent)
