@@ -46,7 +46,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @Composable
-fun SettingScreen(parentNavController: NavController, navController: NavController) {
+fun SettingScreen(navController: NavController) {
     val context = LocalContext.current
 
     Column(
@@ -95,7 +95,7 @@ fun SettingScreen(parentNavController: NavController, navController: NavControll
             text = "About Us",
             icon = Icons.Default.Info
         ) {
-            navigateToWebView(parentNavController, "About Us", AppConstants.ABOUT_US_URL)
+            navigateToWebView(navController, "About Us", AppConstants.ABOUT_US_URL)
         }
 
 
@@ -105,7 +105,7 @@ fun SettingScreen(parentNavController: NavController, navController: NavControll
             text = "Privacy Policy",
             icon = Icons.Default.PrivacyTip
         ) {
-            navigateToWebView(parentNavController, "Privacy Policy", AppConstants.PRIVACY_POLICY_URL)
+            navigateToWebView(navController, "Privacy Policy", AppConstants.PRIVACY_POLICY_URL)
         }
 
         HeightGap(8.dp)
@@ -114,7 +114,7 @@ fun SettingScreen(parentNavController: NavController, navController: NavControll
             text = "Terms of Use",
             icon = Icons.Default.Description
         ) {
-            navigateToWebView(parentNavController, "Terms of Use", AppConstants.TERMS_OF_USE_URL)
+            navigateToWebView(navController, "Terms of Use", AppConstants.TERMS_OF_USE_URL)
         }
 
         HeightGap(8.dp)

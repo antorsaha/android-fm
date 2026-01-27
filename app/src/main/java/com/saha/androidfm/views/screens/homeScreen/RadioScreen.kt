@@ -57,15 +57,20 @@ import com.saha.androidfm.ui.theme.accent
 import com.saha.androidfm.ui.theme.backgroundColor
 import com.saha.androidfm.ui.theme.primaryTextColor
 import com.saha.androidfm.ui.theme.secondaryTextColor
-import com.saha.androidfm.utils.helpers.AdManager
-import com.saha.androidfm.utils.helpers.createAdManager
 import com.saha.androidfm.utils.helpers.AppHelper
+import com.saha.androidfm.utils.helpers.createAdManager
 import com.saha.androidfm.viewmodels.RadioPlayerViewModel
 import com.saha.androidfm.views.components.AudioVisualizerBars
 import com.saha.androidfm.views.components.HeightGap
 import com.saha.androidfm.views.components.WidthGap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+
+// Route objects for navigation
+object RadioScreenRoute
+object LiveStreamScreenRoute
+object SettingsScreenRoute
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -81,10 +86,10 @@ fun RadioScreen(
     // Separate state for animations - updates with delay after actual playback state changes
     var isAnimating by remember { mutableStateOf(isPlaying) }
     var showSleepTimerCover by remember { mutableStateOf(false) }
-    
+
     // Initialize unified Ad Manager (supports both AdMob and Meta)
     val adManager = remember { createAdManager(context) }
-    
+
     // Load ad when screen is created
     LaunchedEffect(Unit) {
         adManager.loadAd()
@@ -98,13 +103,11 @@ fun RadioScreen(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
 
         ) {
 
@@ -144,8 +147,7 @@ fun RadioScreen(
                         Image(
                             painter = painterResource(R.drawable.icon_image),
                             contentDescription = "App Icon",
-                            modifier = Modifier
-                                .size(120.dp)
+                            modifier = Modifier.size(120.dp)
 
                         )
 
@@ -216,21 +218,18 @@ fun RadioScreen(
                     tint = primaryTextColor,
                     modifier = Modifier
                         .size(32.dp)
-                        .clickable { showSleepTimerCover = true }
-                )
+                        .clickable { showSleepTimerCover = true })
 
                 // Play/Pause Button
                 Box(
                     modifier = Modifier
                         .size(72.dp)
                         .background(
-                            color = accent,
-                            shape = CircleShape
+                            color = accent, shape = CircleShape
                         )
                         .clickable(
                             indication = null, // Remove ripple for instant feedback
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
+                            interactionSource = remember { MutableInteractionSource() }) {
                             // Launch in coroutine scope to ensure non-blocking
                             coroutineScope.launch {
                                 if (isPlaying) {
@@ -255,8 +254,7 @@ fun RadioScreen(
                                     }
                                 }
                             }
-                        },
-                    contentAlignment = Alignment.Center
+                        }, contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = if (isAnimating) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -275,8 +273,7 @@ fun RadioScreen(
                         .size(32.dp)
                         .clickable {
                             AppHelper.shareApp(context)
-                        }
-                )
+                        })
             }
 
             HeightGap(32.dp)
@@ -285,17 +282,14 @@ fun RadioScreen(
 
         // Sleep Timer Full Screen Cover
         AnimatedVisibility(
-            visible = showSleepTimerCover,
-            enter = fadeIn(),
-            exit = fadeOut()
+            visible = showSleepTimerCover, enter = fadeIn(), exit = fadeOut()
         ) {
             SleepTimerCover(
                 onClose = { showSleepTimerCover = false },
                 onOptionSelected = { minutes ->
                     radioPlayerViewModel.setSleepTimer(minutes)
                     showSleepTimerCover = false
-                }
-            )
+                })
         }
 
     }
@@ -303,8 +297,7 @@ fun RadioScreen(
 
 @Composable
 fun SleepTimerCover(
-    onClose: () -> Unit,
-    onOptionSelected: (Int) -> Unit
+    onClose: () -> Unit, onOptionSelected: (Int) -> Unit
 ) {
     val timerOptions = listOf(
         "Off" to 0,
@@ -328,8 +321,7 @@ fun SleepTimerCover(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
             ) {
                 IconButton(onClick = onClose) {
                     Icon(
@@ -356,17 +348,14 @@ fun SleepTimerCover(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
-                    .padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 items(timerOptions) { (label, minutes) ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onOptionSelected(minutes) }
-                            .padding(vertical = 16.dp, horizontal = 24.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onOptionSelected(minutes) }
+                        .padding(vertical = 16.dp, horizontal = 24.dp),
+                        contentAlignment = Alignment.Center) {
                         Text(
                             text = label,
                             style = MaterialTheme.typography.titleLarge,

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "865013723294",
+    "project_id": "codecanoyonprojects",
+    "storage_bucket": "codecanoyonprojects.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:865013723294:android:d53d490fd963078672cb8f",
+        "android_client_info": {
+          "package_name": "com.saha.androidfm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTdiYVELfihYEr_s8Lw0cYJev-aGjBmwk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:865013723294:android:811f8b837161fb3972cb8f",
+        "android_client_info": {
+          "package_name": "com.saha.composewebviewapptemplate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTdiYVELfihYEr_s8Lw0cYJev-aGjBmwk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
