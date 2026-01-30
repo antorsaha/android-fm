@@ -54,7 +54,7 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             // Save the onboarding completion status to SharedPreferences
             // This persists across app restarts
-            //preferencesManager.setOnboardingCompleted(true)
+            preferencesManager.setOnboardingCompleted(true)
         }
     }
 }

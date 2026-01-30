@@ -1,3 +1,5 @@
+@file:Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
+
 package com.saha.androidfm.views
 
 import android.app.Activity
@@ -23,6 +25,8 @@ import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.VideoCameraFront
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -216,15 +220,8 @@ fun App() {
                         }
                     }
 
-                    FloatingBottomNavigationBar(
-                        items = bottomNavItems,
-                        currentRoute = when (currentScreenName) {
-                            RadioScreenRoute::class.java.name -> home.route
-                            LiveStreamScreenRoute::class.java.name -> history.route
-                            SettingsScreenRoute::class.java.name -> settings.route
-                            else -> null
-                        },
-                        onItemClick = { screen ->
+                    NavigationBar {
+                        bottomNavItems.forEach { screen ->
                             val targetScreenName = when (screen.route) {
                                 home.route -> RadioScreenRoute::class.java.name
                                 history.route -> LiveStreamScreenRoute::class.java.name
@@ -232,22 +229,39 @@ fun App() {
                                 else -> RadioScreenRoute::class.java.name
                             }
                             
-                            // Don't navigate if already on the target screen
-                            if (currentScreenName != targetScreenName) {
-                                navController.navigate(
-                                    NavigationWrapper(
-                                        data = null,
-                                        screenName = targetScreenName
+                            val isSelected = currentScreenName == targetScreenName
+                            
+                            NavigationBarItem(
+                                icon = {
+                                    Icon(
+                                        imageVector = screen.icon,
+                                        contentDescription = screen.title,
+                                        tint = if (isSelected) accent else secondaryTextColor
                                     )
-                                ) {
-                                    // Use launchSingleTop to prevent duplicate entries
-                                    // This will replace the current screen if it's the same type
-                                    launchSingleTop = true
-                                    restoreState = true
+                                },
+                                label = {
+                                    Text(text = screen.title)
+                                },
+                                selected = isSelected,
+                                onClick = {
+                                    // Don't navigate if already on the target screen
+                                    if (!isSelected) {
+                                        navController.navigate(
+                                            NavigationWrapper(
+                                                data = null,
+                                                screenName = targetScreenName
+                                            )
+                                        ) {
+                                            // Use launchSingleTop to prevent duplicate entries
+                                            // This will replace the current screen if it's the same type
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
                                 }
-                            }
+                            )
                         }
-                    )
+                    }
                 }
             }
         }
