@@ -24,7 +24,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "CONTENT_PROVIDER_AUTHORITY", "\"${applicationId}.stickercontentprovider\"")
     }
 
     buildTypes {
@@ -51,7 +50,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -70,27 +68,22 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-
-    //dagger hilt
+    // Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
+    // Gson for navigation serialization
+    implementation("com.google.code.gson:gson:2.10.1")
 
-    //retrofit
-    implementation(libs.retrofit)
-    implementation(libs.okhttp)
-    implementation(libs.logging.interceptor)
-    implementation(libs.converter.gson)
-
-    //ViewModel
+    // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
 
-    //Navigation with kotlin serialization
+    // Navigation with Kotlin serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
-    //coil for image loading
+    // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.6.0")
 
     implementation("com.airbnb.android:lottie-compose:4.0.0")

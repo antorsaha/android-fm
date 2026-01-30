@@ -4,21 +4,13 @@ package com.saha.androidfm.views
 
 import android.app.Activity
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Radio
@@ -33,16 +25,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -62,7 +47,6 @@ import com.saha.androidfm.data.enums.Screen
 import com.saha.androidfm.ui.theme.accent
 import com.saha.androidfm.ui.theme.backgroundColor
 import com.saha.androidfm.ui.theme.secondaryTextColor
-import com.saha.androidfm.ui.theme.surface
 import com.saha.androidfm.utils.helpers.AdNetwork
 import com.saha.androidfm.utils.helpers.AppConstants
 import com.saha.androidfm.utils.helpers.LoadingManager
@@ -107,10 +91,6 @@ fun App() {
     
     // Global state manager for loading indicator
     val isLoading by LoadingManager.isLoading.collectAsState()
-    
-    // Note: DialogManager is available but not currently used in App.kt
-    // Dialogs are handled at the screen level. This can be used for global dialogs if needed.
-    // val centralDialogSpec by DialogManager.dialog.collectAsState()
 
     // Define bottom navigation items with icons and labels
     val home = Screen("radio", "Radio", Icons.Default.Radio)
@@ -143,9 +123,8 @@ fun App() {
         }
     }
 
-    // Animation durations for screen transitions
-    val animationDuration = 500 // Duration for screen slide animations
-    val bottomNavAnimationDuration = 200 // Duration for bottom nav animations (unused but kept for future use)
+    // Animation duration for screen transitions
+    val animationDuration = 500
 
     // Show global loading indicator when isLoading is true
     if (isLoading) {
@@ -351,118 +330,5 @@ fun App() {
                 }
             }
         }
-    }
-}
-
-/**
- * Custom floating bottom navigation bar component.
- * 
- * This composable creates a modern, floating-style bottom navigation bar with:
- * - Rounded corners and shadow for elevation effect
- * - Gradient background for visual appeal
- * - Animated icon and text colors based on selection state
- * - Smooth transitions between navigation items
- * 
- * @param items List of Screen objects representing navigation items
- * @param currentRoute The currently active route identifier
- * @param onItemClick Callback invoked when a navigation item is clicked
- */
-@Composable
-fun FloatingBottomNavigationBar(
-    items: List<Screen>,
-    currentRoute: String?,
-    onItemClick: (Screen) -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp, vertical = 8.dp)
-            .padding(bottom = 16.dp)
-            .height(64.dp)
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(35.dp),
-                ambientColor = Color.Black.copy(alpha = 0.3f),
-                spotColor = Color.Black.copy(alpha = 0.2f)
-            )
-            .clip(RoundedCornerShape(35.dp))
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        surface.copy(alpha = 0.95f),
-                        surface.copy(alpha = 0.9f)
-                    )
-                )
-            )
-            .border(width = 0.3.dp, color = secondaryTextColor, shape = RoundedCornerShape(35.dp))
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            items.forEach { screen ->
-                FloatingNavItem(
-                    screen = screen,
-                    isSelected = currentRoute == screen.route,
-                    onClick = { onItemClick(screen) }
-                )
-            }
-        }
-    }
-}
-
-/**
- * Individual navigation item within the floating bottom navigation bar.
- * 
- * Each item displays:
- * - An icon that changes color based on selection state
- * - A label text that also changes color when selected
- * - Smooth color animations when selection state changes
- * 
- * @param screen The Screen object containing icon, title, and route information
- * @param isSelected Whether this item is currently selected/active
- * @param onClick Callback invoked when the item is clicked
- */
-@Composable
-fun FloatingNavItem(
-    screen: Screen,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val iconColor by animateColorAsState(
-        targetValue = if (isSelected) accent else secondaryTextColor,
-        animationSpec = tween(durationMillis = 200),
-        label = "iconColor"
-    )
-
-    val textColor by animateColorAsState(
-        targetValue = if (isSelected) accent else secondaryTextColor,
-        animationSpec = tween(durationMillis = 200),
-        label = "textColor"
-    )
-
-    Column(
-        modifier = Modifier
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = screen.icon,
-            contentDescription = screen.title,
-            modifier = Modifier.size(24.dp),
-            tint = iconColor
-        )
-        Text(
-            text = screen.title,
-            fontSize = 11.sp,
-            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-            color = textColor,
-            modifier = Modifier.padding(top = 4.dp)
-        )
     }
 }

@@ -4,7 +4,7 @@ import android.util.Log
 import com.saha.androidfm.BuildConfig
 
 object Logger {
-    private const val TAG = "FairDrivePartner"
+    private const val TAG = "AndroidFM"
 
     fun d(message: String, tag: String = TAG) {
         if (BuildConfig.DEBUG) {

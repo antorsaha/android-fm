@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import com.saha.androidfm.data.repo.Repo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -15,14 +14,10 @@ import javax.inject.Inject
  * Currently, this ViewModel is minimal as the Live Stream screen manages
  * its own ExoPlayer instance directly. This ViewModel can be extended in the
  * future if state management or business logic is needed.
- * 
- * Note: This ViewModel was previously used for sticker/image management,
- * but that functionality has been removed as it's not related to live streaming.
  */
 @HiltViewModel
 class LiveSteamViewModel @Inject constructor(
-    application: Application,
-    private val apiRepo: Repo,
+    application: Application
 ) : AndroidViewModel(application) {
 
     /**
